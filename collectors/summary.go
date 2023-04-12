@@ -1,4 +1,4 @@
-package main
+package collectors
 
 type GroupRow interface{}
 
