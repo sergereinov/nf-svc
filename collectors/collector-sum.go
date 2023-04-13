@@ -7,6 +7,7 @@ import (
 	"time"
 
 	flowmessage "github.com/cloudflare/goflow/v3/pb"
+	"github.com/sergereinov/nf-svc/loggers"
 )
 
 type summaryCollector struct {
@@ -53,10 +54,10 @@ func (c *summaryCollector) loop() {
 func (c *summaryCollector) dumpSummary() string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("*** Summary for every %d minutes ***\n", c.interval))
+	sb.WriteString(fmt.Sprintf("*** Summary for every %d minutes ***%s", c.interval, loggers.LineBreak))
 
 	for partition, groups := range c.summary.Dump() {
-		sb.WriteString(fmt.Sprintf("%v\n", partition))
+		sb.WriteString(fmt.Sprintf("%s%s", partition, loggers.LineBreak))
 
 		type row struct {
 			group string
@@ -74,9 +75,11 @@ func (c *summaryCollector) dumpSummary() string {
 		})
 
 		for _, r := range rows {
-			sb.WriteString(fmt.Sprintf("  %v = %+v\n", r.group, r.value))
+			sb.WriteString(fmt.Sprintf("  %v, %+v%s", r.group, r.value, loggers.LineBreak))
 		}
 	}
+
+	sb.WriteString(loggers.LineBreak)
 
 	return sb.String()
 }

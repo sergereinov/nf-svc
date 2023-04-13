@@ -8,7 +8,8 @@ import (
 )
 
 type GroupMsg struct {
-	Bytes uint64
+	Bytes   uint64
+	Packets uint64
 }
 
 type Msg struct {
@@ -65,5 +66,6 @@ func (m Msg) GroupKey() string {
 
 func (m Msg) Aggregate(acc GroupMsg) GroupMsg {
 	acc.Bytes += m.Bytes
+	acc.Packets += m.Packets
 	return acc
 }
