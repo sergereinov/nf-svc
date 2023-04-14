@@ -15,15 +15,20 @@ type summaryCollector struct {
 	dump            chan<- string
 	messages        chan []*flowmessage.FlowMessage
 	summary         Summary[GroupMsg]
-	trackingClients []string
+	trackingClients map[string]struct{}
 }
 
 func NewSummaryCollector(interval int, dump chan<- string, tracking []string) *summaryCollector {
+	trackingMap := make(map[string]struct{})
+	for _, c := range tracking {
+		trackingMap[c] = struct{}{}
+	}
+
 	c := &summaryCollector{
 		interval:        interval,
 		dump:            dump,
 		messages:        make(chan []*flowmessage.FlowMessage),
-		trackingClients: tracking,
+		trackingClients: trackingMap,
 	}
 	go c.loop()
 	return c

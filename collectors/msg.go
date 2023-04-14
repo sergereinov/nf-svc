@@ -15,7 +15,7 @@ type GroupMsg struct {
 type Msg struct {
 	*flowmessage.FlowMessage
 
-	trackingClients []string
+	trackingClients map[string]struct{}
 }
 
 func (m Msg) Partition() string {
@@ -43,13 +43,12 @@ func (m Msg) describeOppositePort() string {
 	}
 
 	src := net.IP(m.SrcAddr).String()
-	for _, v := range m.trackingClients {
-		if v == src {
-			//all packets from trackingClients treated as a response to a random port
-			//so we should consider the SrcPort
-			return fmt.Sprintf("SrcPort=%v", m.SrcPort)
-		}
+	if _, ok := m.trackingClients[src]; ok {
+		//all packets from trackingClients treated as a response to a random port
+		//so we should consider the SrcPort
+		return fmt.Sprintf("SrcPort=%v", m.SrcPort)
 	}
+
 	return fmt.Sprintf("DstPort=%v", m.DstPort)
 }
 

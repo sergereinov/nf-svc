@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type commonLogger struct {
 	logger *lumberjack.Logger
+	mu     sync.Mutex
 	bw     *BufferedWriter
 }
 
@@ -38,6 +40,8 @@ const (
 )
 
 func (c *commonLogger) printString(text string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	// log to logfile
 	c.bw.WriteWithHeaderAndLineBreak(c.logger, text)
 	// std log to stdout

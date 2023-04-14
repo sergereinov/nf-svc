@@ -1,7 +1,11 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/sergereinov/nf-svc/collectors"
+	"github.com/sergereinov/nf-svc/config"
 	"github.com/sergereinov/nf-svc/loggers"
 	"github.com/sergereinov/nf-svc/transport"
 
@@ -12,20 +16,23 @@ import (
 const (
 	workers = 1
 	addr    = ""
-	port    = 2055
 	reuse   = false
-
-	logsPath = "./logs"
 )
 
-var trackingClients = []string{"192.168.255.1"}
-var dumpIntervals = []int{2, 10, 60}
-
 func main() {
-	// Create loggers
-	log, netflowLogger, summaryLogger := loggers.NewLoggers(logsPath)
 
-	log.Info("Starting")
+	cfg, err := config.Load()
+	if err != nil {
+		// Log fatal error to default logger
+		log.Fatalf("Error: %v", err)
+	}
+
+	// Create loggers and change the default logger
+	log, netflowLogger, summaryLogger := loggers.NewLoggers(cfg.LogsPath)
+
+	execPath, _ := os.Executable()
+	log.Infof("Starting %v", execPath)
+	log.Infof("Config: %+v", cfg)
 
 	// Create and run log-writers goroutines
 	dumpSummary := make(chan string)
@@ -34,10 +41,10 @@ func main() {
 	loggers.NewLoggerWriter(dumpNetflow, netflowLogger)
 
 	// Create collectors that will aggregate summaries
-	consumers := make([]chan<- []*flowmessage.FlowMessage, 0, len(dumpIntervals)+1)
-	for _, interval := range dumpIntervals {
+	consumers := make([]chan<- []*flowmessage.FlowMessage, 0, len(cfg.SummaryIntervals)+1)
+	for _, interval := range cfg.SummaryIntervals {
 		if interval > 0 {
-			c := collectors.NewSummaryCollector(interval, dumpSummary, trackingClients)
+			c := collectors.NewSummaryCollector(interval, dumpSummary, cfg.TrackingClients)
 			consumers = append(consumers, c.GetMessagesChannel())
 		}
 	}
@@ -56,7 +63,7 @@ func main() {
 	}
 
 	// Run goflow's FlowRoutine
-	err := s.FlowRoutine(workers, addr, port, reuse)
+	err = s.FlowRoutine(workers, addr, cfg.Port, reuse)
 	if err != nil {
 		log.Fatalf("Fatal error: could not listen to UDP (%v)", err)
 	}

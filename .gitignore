@@ -16,3 +16,6 @@
 
 # Local/Dev logs
 logs/
+
+# Configs
+*.ini

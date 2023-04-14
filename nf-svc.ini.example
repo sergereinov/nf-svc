@@ -1,0 +1,5 @@
+[Settings]
+Port = 2055
+LogsPath = ./logs
+TrackingClients = 192.168.255.1
+SummaryIntervals = 2, 10, 60
