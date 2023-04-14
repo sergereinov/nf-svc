@@ -2,7 +2,6 @@ package collectors
 
 import (
 	flowmessage "github.com/cloudflare/goflow/v3/pb"
-	"github.com/cloudflare/goflow/v3/utils"
 )
 
 type netflowCollector struct {
@@ -26,7 +25,7 @@ func (c *netflowCollector) GetMessagesChannel() chan<- []*flowmessage.FlowMessag
 func (c *netflowCollector) loop() {
 	for messages := range c.messages {
 		for _, m := range messages {
-			c.dump <- utils.FlowMessageToString(m)
+			c.dump <- FormatFlowMessage(m)
 		}
 	}
 }
