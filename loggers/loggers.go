@@ -15,19 +15,23 @@ const (
 	_NETFLOW_LOG = "-netflow.log"
 	_SUMMARY_LOG = "-summary.log"
 
-	_MAX_SIZE   = 10    // megabytes
 	_MAX_BACKUP = 0     // disabled
-	_MAX_AGE    = 30    // days
 	_COMPRESS   = false // disabled
 
 	_DEFAULT_BASENAME = "nf-svc"
 )
 
-func NewLoggers(path string) (logger *commonLogger, netflow *lumberjack.Logger, summary *lumberjack.Logger) {
+type LoggersConfig interface {
+	GetKeepDays() int
+	GetMaxFileSizeMB() int
+	GetPath() string
+}
+
+func NewLoggers(cfg LoggersConfig) (logger *commonLogger, netflow *lumberjack.Logger, summary *lumberjack.Logger) {
 	basename := baseExecutableName()
-	logger = newCommonLogger(path, basename)
-	netflow = newNetflowLogger(path, basename)
-	summary = newSummaryLogger(path, basename)
+	logger = newCommonLogger(cfg, basename)
+	netflow = newNetflowLogger(cfg, basename)
+	summary = newSummaryLogger(cfg, basename)
 	return
 }
 
@@ -52,13 +56,13 @@ func baseExecutableName() string {
 	return basename
 }
 
-func newCommonLogger(path, basename string) *commonLogger {
-	logPath := filepath.Join(path, basename+_COMMON_LOG)
+func newCommonLogger(cfg LoggersConfig, basename string) *commonLogger {
+	logPath := filepath.Join(cfg.GetPath(), basename+_COMMON_LOG)
 	logger := &lumberjack.Logger{
 		Filename:   logPath,
-		MaxSize:    _MAX_SIZE,
+		MaxSize:    cfg.GetMaxFileSizeMB(),
 		MaxBackups: _MAX_BACKUP,
-		MaxAge:     _MAX_AGE,
+		MaxAge:     cfg.GetKeepDays(),
 		Compress:   _COMPRESS,
 	}
 	return &commonLogger{
@@ -67,24 +71,24 @@ func newCommonLogger(path, basename string) *commonLogger {
 	}
 }
 
-func newNetflowLogger(path, basename string) *lumberjack.Logger {
-	logPath := filepath.Join(path, basename+_NETFLOW_LOG)
+func newNetflowLogger(cfg LoggersConfig, basename string) *lumberjack.Logger {
+	logPath := filepath.Join(cfg.GetPath(), basename+_NETFLOW_LOG)
 	return &lumberjack.Logger{
 		Filename:   logPath,
-		MaxSize:    _MAX_SIZE,
+		MaxSize:    cfg.GetMaxFileSizeMB(),
 		MaxBackups: _MAX_BACKUP,
-		MaxAge:     _MAX_AGE,
+		MaxAge:     cfg.GetKeepDays(),
 		Compress:   _COMPRESS,
 	}
 }
 
-func newSummaryLogger(path, basename string) *lumberjack.Logger {
-	logPath := filepath.Join(path, basename+_SUMMARY_LOG)
+func newSummaryLogger(cfg LoggersConfig, basename string) *lumberjack.Logger {
+	logPath := filepath.Join(cfg.GetPath(), basename+_SUMMARY_LOG)
 	return &lumberjack.Logger{
 		Filename:   logPath,
-		MaxSize:    _MAX_SIZE,
+		MaxSize:    cfg.GetMaxFileSizeMB(),
 		MaxBackups: _MAX_BACKUP,
-		MaxAge:     _MAX_AGE,
+		MaxAge:     cfg.GetKeepDays(),
 		Compress:   _COMPRESS,
 	}
 }

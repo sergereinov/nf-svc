@@ -28,7 +28,7 @@ func main() {
 	}
 
 	// Create loggers and change the default logger
-	log, netflowLogger, summaryLogger := loggers.NewLoggers(cfg.LogsPath)
+	log, netflowLogger, summaryLogger := loggers.NewLoggers(&cfg.Logs)
 
 	execPath, _ := os.Executable()
 	log.Infof("Starting %v", execPath)

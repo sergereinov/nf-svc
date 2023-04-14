@@ -11,9 +11,9 @@ import (
 type Config struct {
 	IniPath          string
 	Port             int
-	LogsPath         string
 	TrackingClients  []string
 	SummaryIntervals []int
+	Logs             Logs
 }
 
 const (
@@ -24,25 +24,17 @@ var (
 	_DEFAULT_INTERVALS = []int{20, 60, 8 * 60}
 )
 
-func Load() (Config, error) {
+func Load() (*Config, error) {
 	path := getIniPath()
 
 	cfg, err := ini.Load(path)
 	if err != nil {
-		return Config{},
-			fmt.Errorf("failed to read file %s: %w", path, err)
+		return nil, fmt.Errorf("failed to read file %s: %w", path, err)
 	}
 
 	settings := cfg.Section("Settings")
 
 	port := settings.Key("Port").MustInt(2055)
-
-	logsPath := settings.Key("LogsPath").MustString("./logs")
-	if !filepath.IsAbs(logsPath) && filepath.IsAbs(path) {
-		dir := filepath.Dir(path)
-		logsPath = filepath.Join(dir, logsPath)
-		logsPath = filepath.Clean(logsPath)
-	}
 
 	clientsSlice := settings.Key("TrackingClients").Strings(",")
 
@@ -51,12 +43,26 @@ func Load() (Config, error) {
 		summaryIntervals = _DEFAULT_INTERVALS
 	}
 
-	return Config{
+	logs := cfg.Section("Logs")
+	logsKeepDays := logs.Key("KeepDays").MustInt(30)
+	logsMaxFileSize := logs.Key("MaxFileSizeMB").MustInt(10)
+	logsPath := logs.Key("Path").MustString("./logs")
+	if !filepath.IsAbs(logsPath) && filepath.IsAbs(path) {
+		dir := filepath.Dir(path)
+		logsPath = filepath.Join(dir, logsPath)
+		logsPath = filepath.Clean(logsPath)
+	}
+
+	return &Config{
 			IniPath:          path,
 			Port:             port,
-			LogsPath:         logsPath,
 			TrackingClients:  clientsSlice,
 			SummaryIntervals: summaryIntervals,
+			Logs: Logs{
+				KeepDays:      logsKeepDays,
+				MaxFileSizeMB: logsMaxFileSize,
+				Path:          logsPath,
+			},
 		},
 		nil
 }
