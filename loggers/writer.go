@@ -5,13 +5,14 @@ import "io"
 type loggerWriter struct {
 	input  <-chan string
 	output io.Writer
-	bw     bufferedWriter
+	bw     *BufferedWriter
 }
 
 func NewLoggerWriter(input <-chan string, output io.Writer) *loggerWriter {
 	writer := &loggerWriter{
 		input:  input,
 		output: output,
+		bw:     &BufferedWriter{},
 	}
 	go writer.loop()
 	return writer

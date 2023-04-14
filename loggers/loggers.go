@@ -63,6 +63,7 @@ func newCommonLogger(path, basename string) *commonLogger {
 	}
 	return &commonLogger{
 		logger: logger,
+		bw:     &BufferedWriter{},
 	}
 }
 

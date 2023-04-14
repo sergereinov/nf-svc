@@ -5,11 +5,15 @@ import (
 	"time"
 )
 
-type bufferedWriter struct {
+type BufferedWriter struct {
 	buf []byte
 }
 
-func (l bufferedWriter) WriteWithHeaderAndLineBreak(w io.Writer, text string) {
+func (l *BufferedWriter) WriteWithHeaderAndLineBreak(w io.Writer, text string) {
+	if l == nil {
+		return
+	}
+
 	now := time.Now()
 
 	l.buf = l.buf[:0]

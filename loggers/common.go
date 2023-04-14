@@ -10,7 +10,7 @@ import (
 
 type commonLogger struct {
 	logger *lumberjack.Logger
-	bw     bufferedWriter
+	bw     *BufferedWriter
 }
 
 // Logger that conforms to the goflow-logger / logrus-logger interface
