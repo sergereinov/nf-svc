@@ -3,7 +3,7 @@ package config
 type Logs struct {
 	KeepDays      int
 	MaxFileSizeMB int
-	Path          string
+	Dir           string
 }
 
 func (c *Logs) GetKeepDays() int {
@@ -14,6 +14,6 @@ func (c *Logs) GetMaxFileSizeMB() int {
 	return c.MaxFileSizeMB
 }
 
-func (c *Logs) GetPath() string {
-	return c.Path
+func (c *Logs) GetDir() string {
+	return c.Dir
 }

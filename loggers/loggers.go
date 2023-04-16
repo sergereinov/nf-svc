@@ -24,7 +24,7 @@ const (
 type LoggersConfig interface {
 	GetKeepDays() int
 	GetMaxFileSizeMB() int
-	GetPath() string
+	GetDir() string
 }
 
 func NewLoggers(cfg LoggersConfig) (logger *commonLogger, netflow *lumberjack.Logger, summary *lumberjack.Logger) {
@@ -57,7 +57,7 @@ func baseExecutableName() string {
 }
 
 func newCommonLogger(cfg LoggersConfig, basename string) *commonLogger {
-	logPath := filepath.Join(cfg.GetPath(), basename+_COMMON_LOG)
+	logPath := filepath.Join(cfg.GetDir(), basename+_COMMON_LOG)
 	logger := &lumberjack.Logger{
 		Filename:   logPath,
 		MaxSize:    cfg.GetMaxFileSizeMB(),
@@ -72,7 +72,7 @@ func newCommonLogger(cfg LoggersConfig, basename string) *commonLogger {
 }
 
 func newNetflowLogger(cfg LoggersConfig, basename string) *lumberjack.Logger {
-	logPath := filepath.Join(cfg.GetPath(), basename+_NETFLOW_LOG)
+	logPath := filepath.Join(cfg.GetDir(), basename+_NETFLOW_LOG)
 	return &lumberjack.Logger{
 		Filename:   logPath,
 		MaxSize:    cfg.GetMaxFileSizeMB(),
@@ -83,7 +83,7 @@ func newNetflowLogger(cfg LoggersConfig, basename string) *lumberjack.Logger {
 }
 
 func newSummaryLogger(cfg LoggersConfig, basename string) *lumberjack.Logger {
-	logPath := filepath.Join(cfg.GetPath(), basename+_SUMMARY_LOG)
+	logPath := filepath.Join(cfg.GetDir(), basename+_SUMMARY_LOG)
 	return &lumberjack.Logger{
 		Filename:   logPath,
 		MaxSize:    cfg.GetMaxFileSizeMB(),

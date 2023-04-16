@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"github.com/sergereinov/nf-svc/collectors"
@@ -20,18 +19,20 @@ const (
 )
 
 func main() {
-
-	cfg, err := config.Load()
-	if err != nil {
-		// Log fatal error to default logger
-		log.Fatalf("Error: %v", err)
-	}
+	// Load config
+	pathIni, cfg, errIni := config.Load()
 
 	// Create loggers and change the default logger
 	log, netflowLogger, summaryLogger := loggers.NewLoggers(&cfg.Logs)
 
+	// Report instance status
 	execPath, _ := os.Executable()
 	log.Infof("Starting %v", execPath)
+	if errIni != nil {
+		log.Errorf("Load %s: %v", pathIni, errIni)
+	} else {
+		log.Infof("Load %s", pathIni)
+	}
 	log.Infof("Config: %+v", cfg)
 
 	// Create and run log-writers goroutines
@@ -63,7 +64,7 @@ func main() {
 	}
 
 	// Run goflow's FlowRoutine
-	err = s.FlowRoutine(workers, addr, cfg.Port, reuse)
+	err := s.FlowRoutine(workers, addr, cfg.Port, reuse)
 	if err != nil {
 		log.Fatalf("Fatal error: could not listen to UDP (%v)", err)
 	}

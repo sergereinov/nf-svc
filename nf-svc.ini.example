@@ -1,9 +1,9 @@
 [Settings]
-Port = 2055
-TrackingClients = 192.168.255.1
+Port             = 2055
 SummaryIntervals = 20, 60, 480
+TrackingClients  = 192.168.255.1
 
 [Logs]
-KeepDays = 30
+KeepDays      = 30
 MaxFileSizeMB = 10
-Path = ./logs
+Dir           = ./logs
