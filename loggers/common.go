@@ -41,6 +41,7 @@ const (
 	_FATAL = "[FATAL] "
 )
 
+// Create logger that conforms to the goflow-logger / logrus-logger interface
 func NewCommonLogger(cfg LoggersConfig) *commonLogger {
 	logger := newLogger(cfg, baseExecutableName()+_COMMON_LOG)
 	return &commonLogger{

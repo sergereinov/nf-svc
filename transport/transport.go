@@ -8,6 +8,7 @@ type transport struct {
 	consumers []chan<- []*flowmessage.FlowMessage
 }
 
+// Create transport that will distributes messages to consumers
 func NewTransport(consumers []chan<- []*flowmessage.FlowMessage) *transport {
 	return &transport{
 		consumers: consumers,

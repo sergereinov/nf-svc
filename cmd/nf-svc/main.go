@@ -8,7 +8,6 @@ import (
 	"github.com/sergereinov/nf-svc/loggers"
 	"github.com/sergereinov/nf-svc/transport"
 
-	flowmessage "github.com/cloudflare/goflow/v3/pb"
 	"github.com/cloudflare/goflow/v3/utils"
 )
 
@@ -22,7 +21,7 @@ func main() {
 	// Load config
 	pathIni, cfg, errIni := config.Load()
 
-	// Create a general purpose logger and change the default logger
+	// Create a general purpose logger
 	log := loggers.NewCommonLogger(&cfg.Logs)
 
 	// Report instance status
@@ -35,24 +34,14 @@ func main() {
 	}
 	log.Infof("Config: %+v", cfg)
 
-	// Create and run log-writers goroutines
-	dumpSummary := loggers.NewSummaryWriter(&cfg.Logs)
-	dumpNetflow := loggers.NewNetflowWriter(&cfg.Logs)
-
-	// Create collectors that will aggregate summaries
-	consumers := make([]chan<- []*flowmessage.FlowMessage, 0, len(cfg.SummaryIntervals)+1)
-	for _, interval := range cfg.SummaryIntervals {
-		if interval > 0 {
-			c := collectors.NewSummaryCollector(interval, dumpSummary, cfg.TrackingClients)
-			consumers = append(consumers, c.GetMessagesChannel())
-		}
+	// Create netflow consumers
+	collectorsLoggers := collectors.Loggers{
+		Summary: loggers.NewSummaryWriter(&cfg.Logs),
+		Netflow: loggers.NewNetflowWriter(&cfg.Logs),
 	}
+	consumers := collectors.NewCollectors(cfg, collectorsLoggers)
 
-	// Create collector that will thranform netflow messages
-	c := collectors.NewNetflowCollector(dumpNetflow)
-	consumers = append(consumers, c.GetMessagesChannel())
-
-	// Create transport that will distributes messages to collectors
+	// Create goflow compatible transport
 	transport := transport.NewTransport(consumers)
 
 	// Init goflow's StateNetFlow
