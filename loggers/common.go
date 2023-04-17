@@ -32,12 +32,22 @@ type Logger interface {
 */
 
 const (
+	_COMMON_LOG = ".log"
+
 	_ERROR = "[ERROR] "
 	_WARN  = "[WARN] "
 	_DEBUG = "[DEBUG] "
 	_INFO  = "[INFO] "
 	_FATAL = "[FATAL] "
 )
+
+func NewCommonLogger(cfg LoggersConfig) *commonLogger {
+	logger := newLogger(cfg, baseExecutableName()+_COMMON_LOG)
+	return &commonLogger{
+		logger: logger,
+		bw:     &BufferedWriter{},
+	}
+}
 
 func (c *commonLogger) printString(text string) {
 	c.mu.Lock()

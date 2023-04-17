@@ -10,31 +10,22 @@ import (
 
 // logger https://github.com/natefinch/lumberjack
 
+// Common consts
 const (
-	_COMMON_LOG  = ".log"
-	_NETFLOW_LOG = "-netflow.log"
-	_SUMMARY_LOG = "-summary.log"
-
 	_MAX_BACKUP = 0     // disabled
 	_COMPRESS   = false // disabled
 
 	_DEFAULT_BASENAME = "nf-svc"
 )
 
+// Loggers config interface for all type loggers
 type LoggersConfig interface {
 	GetKeepDays() int
 	GetMaxFileSizeMB() int
 	GetDir() string
 }
 
-func NewLoggers(cfg LoggersConfig) (logger *commonLogger, netflow *lumberjack.Logger, summary *lumberjack.Logger) {
-	basename := baseExecutableName()
-	logger = newCommonLogger(cfg, basename)
-	netflow = newNetflowLogger(cfg, basename)
-	summary = newSummaryLogger(cfg, basename)
-	return
-}
-
+// Get executable instance file name without file extension
 func baseExecutableName() string {
 	var basename string
 	exe, err := os.Executable()
@@ -56,34 +47,9 @@ func baseExecutableName() string {
 	return basename
 }
 
-func newCommonLogger(cfg LoggersConfig, basename string) *commonLogger {
-	logPath := filepath.Join(cfg.GetDir(), basename+_COMMON_LOG)
-	logger := &lumberjack.Logger{
-		Filename:   logPath,
-		MaxSize:    cfg.GetMaxFileSizeMB(),
-		MaxBackups: _MAX_BACKUP,
-		MaxAge:     cfg.GetKeepDays(),
-		Compress:   _COMPRESS,
-	}
-	return &commonLogger{
-		logger: logger,
-		bw:     &BufferedWriter{},
-	}
-}
-
-func newNetflowLogger(cfg LoggersConfig, basename string) *lumberjack.Logger {
-	logPath := filepath.Join(cfg.GetDir(), basename+_NETFLOW_LOG)
-	return &lumberjack.Logger{
-		Filename:   logPath,
-		MaxSize:    cfg.GetMaxFileSizeMB(),
-		MaxBackups: _MAX_BACKUP,
-		MaxAge:     cfg.GetKeepDays(),
-		Compress:   _COMPRESS,
-	}
-}
-
-func newSummaryLogger(cfg LoggersConfig, basename string) *lumberjack.Logger {
-	logPath := filepath.Join(cfg.GetDir(), basename+_SUMMARY_LOG)
+// Create Lumberjack logger with given filename and params
+func newLogger(cfg LoggersConfig, filename string) *lumberjack.Logger {
+	logPath := filepath.Join(cfg.GetDir(), filename)
 	return &lumberjack.Logger{
 		Filename:   logPath,
 		MaxSize:    cfg.GetMaxFileSizeMB(),

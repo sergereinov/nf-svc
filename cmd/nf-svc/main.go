@@ -22,8 +22,8 @@ func main() {
 	// Load config
 	pathIni, cfg, errIni := config.Load()
 
-	// Create loggers and change the default logger
-	log, netflowLogger, summaryLogger := loggers.NewLoggers(&cfg.Logs)
+	// Create a general purpose logger and change the default logger
+	log := loggers.NewCommonLogger(&cfg.Logs)
 
 	// Report instance status
 	execPath, _ := os.Executable()
@@ -36,10 +36,8 @@ func main() {
 	log.Infof("Config: %+v", cfg)
 
 	// Create and run log-writers goroutines
-	dumpSummary := make(chan string)
-	loggers.NewLoggerWriter(dumpSummary, summaryLogger)
-	dumpNetflow := make(chan string)
-	loggers.NewLoggerWriter(dumpNetflow, netflowLogger)
+	dumpSummary := loggers.NewSummaryWriter(&cfg.Logs)
+	dumpNetflow := loggers.NewNetflowWriter(&cfg.Logs)
 
 	// Create collectors that will aggregate summaries
 	consumers := make([]chan<- []*flowmessage.FlowMessage, 0, len(cfg.SummaryIntervals)+1)
