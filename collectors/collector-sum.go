@@ -1,9 +1,11 @@
 package collectors
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	flowmessage "github.com/cloudflare/goflow/v3/pb"
@@ -12,13 +14,13 @@ import (
 
 type summaryCollector struct {
 	interval        int
-	dump            chan<- string
+	logger          chan<- string
 	messages        chan []*flowmessage.FlowMessage
 	summary         Summary[GroupMsg]
 	trackingClients map[string]struct{}
 }
 
-func NewSummaryCollector(interval int, dump chan<- string, tracking []string) *summaryCollector {
+func NewSummaryCollector(ctx context.Context, wg *sync.WaitGroup, interval int, logger chan<- string, tracking []string) *summaryCollector {
 	trackingMap := make(map[string]struct{})
 	for _, c := range tracking {
 		trackingMap[c] = struct{}{}
@@ -26,11 +28,14 @@ func NewSummaryCollector(interval int, dump chan<- string, tracking []string) *s
 
 	c := &summaryCollector{
 		interval:        interval,
-		dump:            dump,
+		logger:          logger,
 		messages:        make(chan []*flowmessage.FlowMessage),
 		trackingClients: trackingMap,
 	}
-	go c.loop()
+
+	wg.Add(1)
+	go c.loop(ctx, wg)
+
 	return c
 }
 
@@ -38,14 +43,19 @@ func (c *summaryCollector) GetMessagesChannel() chan<- []*flowmessage.FlowMessag
 	return c.messages
 }
 
-func (c *summaryCollector) loop() {
+func (c *summaryCollector) loop(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	ticker := time.NewTicker(time.Duration(c.interval) * time.Minute)
 	defer ticker.Stop()
 
 	for {
 		select {
+		case <-ctx.Done():
+			return
+
 		case <-ticker.C:
-			c.dump <- c.dumpSummary()
+			c.logger <- c.dumpSummary()
 			c.summary = Summary[GroupMsg]{}
 
 		case messages := <-c.messages:
