@@ -14,7 +14,3 @@ func (c *Config) GetSummaryIntervals() []int {
 func (c *Config) GetTrackingClients() []string {
 	return c.TrackingClients
 }
-
-func (c *Config) GetLogs() *Logs {
-	return &c.Logs
-}
