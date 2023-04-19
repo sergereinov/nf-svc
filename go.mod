@@ -4,6 +4,8 @@ go 1.20
 
 require (
 	github.com/cloudflare/goflow/v3 v3.4.4
+	golang.org/x/sys v0.7.0
+	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -19,6 +21,4 @@ require (
 	github.com/prometheus/common v0.0.0-20181126121408-4724e9255275 // indirect
 	github.com/prometheus/procfs v0.0.0-20181204211112-1dc9a6cbc91a // indirect
 	github.com/sirupsen/logrus v1.4.1 // indirect
-	golang.org/x/sys v0.0.0-20190403152447-81d4e9dc473e // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
 )

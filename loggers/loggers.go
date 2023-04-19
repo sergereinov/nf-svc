@@ -37,6 +37,7 @@ func baseExecutableName() string {
 	for i := len(basename) - 1; i >= 0 && !os.IsPathSeparator(basename[i]); i-- {
 		if basename[i] == '.' {
 			basename = basename[:i]
+			break
 		}
 	}
 
