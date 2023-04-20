@@ -27,10 +27,12 @@ func (h *handler) Execute(args []string, requests <-chan svc.ChangeRequest, chan
 
 	// Run the payload goroutine
 	var wgPayload sync.WaitGroup
+	payloadStopped := make(chan struct{})
 	if h.payload != nil {
 		wgPayload.Add(1)
 		go func() {
 			defer wgPayload.Done()
+			defer close(payloadStopped)
 			h.payload(ctx)
 		}()
 	}
@@ -40,18 +42,24 @@ func (h *handler) Execute(args []string, requests <-chan svc.ChangeRequest, chan
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 
 loop:
-	for r := range requests {
-		switch r.Cmd {
-		case svc.Interrogate:
-			changes <- r.CurrentStatus
-		case svc.Stop:
-			h.logger.Printf("Service manager requests svc.Stop")
+	for {
+		select {
+		case <-payloadStopped:
+			h.logger.Printf("Payload stopped unexpectedly")
 			break loop
-		case svc.Shutdown:
-			h.logger.Printf("Service manager requests svc.Shutdown")
-			break loop
-		default:
-			h.logger.Printf("Unexpected control request: %+v", r)
+		case r := <-requests:
+			switch r.Cmd {
+			case svc.Interrogate:
+				changes <- r.CurrentStatus
+			case svc.Stop:
+				//h.logger.Printf("Service manager requests svc.Stop")
+				break loop
+			case svc.Shutdown:
+				//h.logger.Printf("Service manager requests svc.Shutdown")
+				break loop
+			default:
+				h.logger.Printf("Unexpected control request: %+v", r)
+			}
 		}
 	}
 
