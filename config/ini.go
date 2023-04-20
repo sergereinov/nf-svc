@@ -43,7 +43,7 @@ func (f *iniFile) Strings(section, key string, defaultVal []string, optDelim ...
 		return s.Key(key).Strings(delim)
 	}
 
-	s.Key(key).SetValue(strings.Join(defaultVal, delim))
+	s.Key(key).SetValue(strings.Join(defaultVal, delim+" "))
 	return defaultVal
 }
 
@@ -52,7 +52,7 @@ func (f *iniFile) Ints(section, key string, defaultVal []int, optDelim ...string
 	if len(optDelim) > 0 {
 		delim = optDelim[0]
 	} else {
-		delim = ", "
+		delim = ","
 	}
 
 	s := f.Section(section)
@@ -65,7 +65,7 @@ func (f *iniFile) Ints(section, key string, defaultVal []int, optDelim ...string
 		s := strconv.FormatInt(int64(v), 10)
 		sb.WriteString(s)
 		if i < len(defaultVal)-1 {
-			sb.WriteString(delim)
+			sb.WriteString(delim + " ")
 		}
 	}
 	s.Key(key).SetValue(sb.String())
