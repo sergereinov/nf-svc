@@ -9,6 +9,7 @@ import (
 
 type CollectorsConfig interface {
 	GetSummaryIntervals() []int
+	GetSummaryTopCount() int
 	GetTrackingClients() []string
 }
 
@@ -25,7 +26,15 @@ func NewCollectors(ctx context.Context, wg *sync.WaitGroup, cfg CollectorsConfig
 	consumers := make([]chan<- []*flowmessage.FlowMessage, 0, len(summaryIntervals)+1)
 	for _, interval := range summaryIntervals {
 		if interval > 0 {
-			c := NewSummaryCollector(ctx, wg, interval, logs.Summary, cfg.GetTrackingClients())
+			c := NewSummaryCollector(ctx,
+				wg,
+				summaryCollectorConfig{
+					interval:        interval,
+					summaryTopCount: cfg.GetSummaryTopCount(),
+					trackingClients: cfg.GetTrackingClients(),
+				},
+				logs.Summary,
+			)
 			consumers = append(consumers, c.GetMessagesChannel())
 		}
 	}

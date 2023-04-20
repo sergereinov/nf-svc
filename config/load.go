@@ -9,13 +9,14 @@ import (
 const (
 	_DEFAULT_INI_PATH  = "./nf-svc.ini"
 	_DEFAULT_PORT      = 2055
+	_DEFAULT_TOP_COUNT = 100
 	_DEFAULT_KEEP_DAYS = 30
 	_DEFAULT_MAX_SIZE  = 10
 	_DEFAULT_LOGS_DIR  = "./logs"
 )
 
 var (
-	_DEFAULT_INTERVALS = []int{20, 60, 8 * 60}
+	_DEFAULT_INTERVALS = []int{20, 60, 8 * 60, 24 * 60}
 )
 
 func Load(optPath ...string) (string, *Config, error) {
@@ -28,6 +29,7 @@ func Load(optPath ...string) (string, *Config, error) {
 	cfg := &Config{
 		Port:             file.Int("Settings", "Port", _DEFAULT_PORT),
 		SummaryIntervals: file.Ints("Settings", "SummaryIntervals", _DEFAULT_INTERVALS),
+		SummaryTopCount:  file.Int("Settings", "SummaryTopCount", _DEFAULT_TOP_COUNT),
 		TrackingClients:  file.Strings("Settings", "TrackingClients", []string{}),
 
 		Logs: Logs{

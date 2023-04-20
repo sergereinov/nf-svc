@@ -52,7 +52,7 @@ func (f *iniFile) Ints(section, key string, defaultVal []int, optDelim ...string
 	if len(optDelim) > 0 {
 		delim = optDelim[0]
 	} else {
-		delim = ","
+		delim = ", "
 	}
 
 	s := f.Section(section)

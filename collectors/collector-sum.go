@@ -17,19 +17,27 @@ type summaryCollector struct {
 	logger          chan<- string
 	messages        chan []*flowmessage.FlowMessage
 	summary         Summary[GroupMsg]
+	summaryTopCount int
 	trackingClients map[string]struct{}
 }
 
-func NewSummaryCollector(ctx context.Context, wg *sync.WaitGroup, interval int, logger chan<- string, tracking []string) *summaryCollector {
+type summaryCollectorConfig struct {
+	interval        int
+	summaryTopCount int
+	trackingClients []string
+}
+
+func NewSummaryCollector(ctx context.Context, wg *sync.WaitGroup, cfg summaryCollectorConfig, logger chan<- string) *summaryCollector {
 	trackingMap := make(map[string]struct{})
-	for _, c := range tracking {
+	for _, c := range cfg.trackingClients {
 		trackingMap[c] = struct{}{}
 	}
 
 	c := &summaryCollector{
-		interval:        interval,
+		interval:        cfg.interval,
 		logger:          logger,
 		messages:        make(chan []*flowmessage.FlowMessage),
+		summaryTopCount: cfg.summaryTopCount,
 		trackingClients: trackingMap,
 	}
 
@@ -72,7 +80,16 @@ func (c *summaryCollector) dumpSummary() string {
 	sb.WriteString(fmt.Sprintf("*** Summary for every %d minutes ***%s", c.interval, loggers.LineBreak))
 
 	for partition, groups := range c.summary.Dump() {
-		sb.WriteString(fmt.Sprintf("%s%s", partition, loggers.LineBreak))
+
+		if len(groups) <= c.summaryTopCount {
+			sb.WriteString(fmt.Sprintf("%s%s", partition, loggers.LineBreak))
+		} else {
+			sb.WriteString(fmt.Sprintf("%s top %v of %v%s",
+				partition,
+				c.summaryTopCount,
+				len(groups),
+				loggers.LineBreak))
+		}
 
 		type row struct {
 			group string
@@ -88,6 +105,9 @@ func (c *summaryCollector) dumpSummary() string {
 		sort.Slice(rows, func(a, b int) bool {
 			return rows[a].value.Bytes > rows[b].value.Bytes
 		})
+
+		//cut to top count
+		rows = rows[:c.summaryTopCount]
 
 		for _, r := range rows {
 			sb.WriteString(fmt.Sprintf("  %v, %+v%s", r.group, r.value, loggers.LineBreak))
