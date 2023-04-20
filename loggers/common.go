@@ -2,7 +2,6 @@ package loggers
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"sync"
 
@@ -55,8 +54,8 @@ func (c *commonLogger) printString(text string) {
 	defer c.mu.Unlock()
 	// log to logfile
 	c.bw.WriteWithHeaderAndLineBreak(c.logger, text)
-	// std log to stdout
-	log.Print(text)
+	// log to stdout
+	fmt.Fprintln(os.Stdout, text)
 }
 
 func (c *commonLogger) Printf(format string, args ...interface{}) {

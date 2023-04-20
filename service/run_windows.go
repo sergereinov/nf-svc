@@ -4,10 +4,10 @@ package service
 
 import (
 	"context"
-	"sync"
+	runtimeDebug "runtime/debug"
 
 	"golang.org/x/sys/windows/svc"
-	"golang.org/x/sys/windows/svc/debug"
+	svcDebug "golang.org/x/sys/windows/svc/debug"
 )
 
 // ref https://pkg.go.dev/golang.org/x/sys/windows/svc
@@ -26,16 +26,22 @@ func (h *handler) Execute(args []string, requests <-chan svc.ChangeRequest, chan
 	defer cancelContext()
 
 	// Run the payload goroutine
-	var wgPayload sync.WaitGroup
 	payloadStopped := make(chan struct{})
-	if h.payload != nil {
-		wgPayload.Add(1)
-		go func() {
-			defer wgPayload.Done()
-			defer close(payloadStopped)
-			h.payload(ctx)
+	go func() {
+		defer func() {
+			if x := recover(); x != nil {
+				h.logger.Fatalf("panic: %v\n%v", x, string(runtimeDebug.Stack()))
+			}
 		}()
-	}
+		defer close(payloadStopped)
+
+		if h.payload != nil {
+			h.payload(ctx)
+		} else {
+			//warning that we don't have a payload procedure
+			h.logger.Printf("Warning: Service Execute handler has no payload!")
+		}
+	}()
 
 	// Report: service is running and accepting some commands
 	const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown
@@ -45,8 +51,11 @@ loop:
 	for {
 		select {
 		case <-payloadStopped:
+			// Payload can only be stopped via the `cancelContext` procedure
+			// So the `payloadStopped` channel should still be open here.
 			h.logger.Printf("Payload stopped unexpectedly")
 			break loop
+
 		case r := <-requests:
 			switch r.Cmd {
 			case svc.Interrogate:
@@ -68,7 +77,7 @@ loop:
 
 	// Stopping
 	cancelContext()
-	wgPayload.Wait()
+	<-payloadStopped
 	return
 }
 
@@ -88,7 +97,7 @@ func (s Service) runWithConsole(payload func(context.Context)) {
 		payload: payload,
 		logger:  s.Logger,
 	}
-	if err := debug.Run(s.Name, h); err != nil {
+	if err := svcDebug.Run(s.Name, h); err != nil {
 		s.Logger.Printf("Fail to run %s: %v", s.Name, err)
 	}
 }

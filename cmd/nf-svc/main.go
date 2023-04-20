@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"runtime/debug"
 	"sync"
 
 	"github.com/sergereinov/nf-svc/collectors"
@@ -44,18 +45,19 @@ func main() {
 
 		// Report instance status
 		execPath, _ := os.Executable()
-		log.Infof("Starting %s, v%s (%v)", Name, Version, execPath)
+		log.Printf("Starting %s, v%s (%v)", Name, Version, execPath)
 		if errIni != nil {
 			log.Errorf("Ini-file %s: %v", pathIni, errIni)
 		} else {
 			log.Infof("Ini-file %s", pathIni)
 		}
-		log.Infof("Config: %+v", cfg)
+		log.Infof("Config: %+v", *cfg)
 
 		var wg sync.WaitGroup
 
 		// Create netflow consumers
 		collectorsLoggers := collectors.Loggers{
+			Common:  log,
 			Summary: loggers.NewSummaryWriter(ctx, &wg, &cfg.Logs),
 			Netflow: loggers.NewNetflowWriter(ctx, &wg, &cfg.Logs),
 		}
@@ -64,6 +66,12 @@ func main() {
 		// We don't have methods to stop goflow goroutine.
 		// So it will be stopped when exiting the main goroutine.
 		go func() {
+			defer func() {
+				if x := recover(); x != nil {
+					log.Fatalf("panic: %v\n%v", x, string(debug.Stack()))
+				}
+			}()
+
 			// Create goflow compatible transport
 			transport := transport.NewTransport(consumers)
 
@@ -83,6 +91,6 @@ func main() {
 		<-ctx.Done() // just marking what signal we are waiting for to exit
 		wg.Wait()
 
-		log.Infof("Stopped %s, v%s (%v)", Name, Version, execPath)
+		log.Printf("Stopped %s, v%s (%v)", Name, Version, execPath)
 	})
 }

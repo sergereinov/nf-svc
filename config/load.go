@@ -19,14 +19,14 @@ var (
 	_DEFAULT_INTERVALS = []int{20, 60, 8 * 60, 24 * 60}
 )
 
-func Load(optPath ...string) (string, *Config, error) {
-	path := getIniPath(optPath...)
+func Load(optPath ...string) (path string, cfg *Config, err error) {
+	path = getIniPath(optPath...)
 
 	// Load ini file
 	file, errLoad := NewIniFile(path)
 
 	// Prepare config
-	cfg := &Config{
+	cfg = &Config{
 		Port:             file.Int("Settings", "Port", _DEFAULT_PORT),
 		SummaryIntervals: file.Ints("Settings", "SummaryIntervals", _DEFAULT_INTERVALS),
 		SummaryTopCount:  file.Int("Settings", "SummaryTopCount", _DEFAULT_TOP_COUNT),

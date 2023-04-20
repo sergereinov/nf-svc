@@ -3,6 +3,7 @@ package collectors
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
@@ -14,20 +15,23 @@ import (
 
 type summaryCollector struct {
 	interval        int
-	logger          chan<- string
 	messages        chan []*flowmessage.FlowMessage
 	summary         Summary[GroupMsg]
 	summaryTopCount int
 	trackingClients map[string]struct{}
+	reports         chan<- string
+	logger          CollectorsLogger
 }
 
 type summaryCollectorConfig struct {
 	interval        int
 	summaryTopCount int
 	trackingClients []string
+	reports         chan<- string
+	logger          CollectorsLogger
 }
 
-func NewSummaryCollector(ctx context.Context, wg *sync.WaitGroup, cfg summaryCollectorConfig, logger chan<- string) *summaryCollector {
+func NewSummaryCollector(ctx context.Context, wg *sync.WaitGroup, cfg summaryCollectorConfig) *summaryCollector {
 	trackingMap := make(map[string]struct{})
 	for _, c := range cfg.trackingClients {
 		trackingMap[c] = struct{}{}
@@ -35,10 +39,11 @@ func NewSummaryCollector(ctx context.Context, wg *sync.WaitGroup, cfg summaryCol
 
 	c := &summaryCollector{
 		interval:        cfg.interval,
-		logger:          logger,
 		messages:        make(chan []*flowmessage.FlowMessage),
 		summaryTopCount: cfg.summaryTopCount,
 		trackingClients: trackingMap,
+		reports:         cfg.reports,
+		logger:          cfg.logger,
 	}
 
 	wg.Add(1)
@@ -52,6 +57,11 @@ func (c *summaryCollector) GetMessagesChannel() chan<- []*flowmessage.FlowMessag
 }
 
 func (c *summaryCollector) loop(ctx context.Context, wg *sync.WaitGroup) {
+	defer func() {
+		if x := recover(); x != nil {
+			c.logger.Fatalf("panic: %v\n%v", x, string(debug.Stack()))
+		}
+	}()
 	defer wg.Done()
 
 	ticker := time.NewTicker(time.Duration(c.interval) * time.Minute)
@@ -63,7 +73,7 @@ func (c *summaryCollector) loop(ctx context.Context, wg *sync.WaitGroup) {
 			return
 
 		case <-ticker.C:
-			c.logger <- c.dumpSummary()
+			c.reports <- c.dumpSummary()
 			c.summary = Summary[GroupMsg]{}
 
 		case messages := <-c.messages:

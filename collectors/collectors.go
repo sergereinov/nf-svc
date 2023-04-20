@@ -13,7 +13,12 @@ type CollectorsConfig interface {
 	GetTrackingClients() []string
 }
 
+type CollectorsLogger interface {
+	Fatalf(string, ...interface{})
+}
+
 type Loggers struct {
+	Common  CollectorsLogger
 	Summary chan<- string
 	Netflow chan<- string
 }
@@ -32,15 +37,21 @@ func NewCollectors(ctx context.Context, wg *sync.WaitGroup, cfg CollectorsConfig
 					interval:        interval,
 					summaryTopCount: cfg.GetSummaryTopCount(),
 					trackingClients: cfg.GetTrackingClients(),
+					reports:         logs.Summary,
+					logger:          logs.Common,
 				},
-				logs.Summary,
 			)
 			consumers = append(consumers, c.GetMessagesChannel())
 		}
 	}
 
 	// Create collector that will thranform netflow messages
-	c := NewNetflowCollector(ctx, wg, logs.Netflow)
+	c := NewNetflowCollector(ctx,
+		wg,
+		netflowCollectorConfig{
+			reports: logs.Netflow,
+			logger:  logs.Common,
+		})
 	consumers = append(consumers, c.GetMessagesChannel())
 
 	return consumers
