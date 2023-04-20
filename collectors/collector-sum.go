@@ -117,7 +117,9 @@ func (c *summaryCollector) dumpSummary() string {
 		})
 
 		//cut to top count
-		rows = rows[:c.summaryTopCount]
+		if len(rows) > c.summaryTopCount {
+			rows = rows[:c.summaryTopCount]
+		}
 
 		for _, r := range rows {
 			sb.WriteString(fmt.Sprintf("  %v, %+v%s", r.group, r.value, loggers.LineBreak))
