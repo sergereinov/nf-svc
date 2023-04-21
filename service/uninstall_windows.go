@@ -37,6 +37,6 @@ func (s Service) uninstall() error {
 		return fmt.Errorf("fail to delete %s service: %w", s.Name, err)
 	}
 
-	s.Logger.Printf("Service %s uninstalled.\n", s.Name)
+	s.Logger.Printf("Service %s uninstalled successfully.\n", s.Name)
 	return nil
 }
