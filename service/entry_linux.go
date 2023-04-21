@@ -5,6 +5,7 @@ package service
 import (
 	"context"
 	"os/signal"
+	runtimeDebug "runtime/debug"
 	"syscall"
 )
 
@@ -23,20 +24,20 @@ import (
 --- /lib/systemd/system/nf-svc.service sample file ---
 [Unit]
 Description=Standalone NetFlow collector
-ConditionPathExists=/home/nf-svc/nf-svc
+ConditionPathExists=/home/user/nf-svc/nf-svc
 After=network.target
 
 [Service]
 Type=simple
-User=pi
-Group=pi
+User=user
+Group=user
 LimitNOFILE=1024
 
 Restart=always
 RestartSec=5
 
-WorkingDirectory=/home/nf-svc
-ExecStart=/home/nf-svc/nf-svc
+WorkingDirectory=/home/user/nf-svc
+ExecStart=/home/user/nf-svc/nf-svc
 
 [Install]
 WantedBy=multi-user.target
@@ -44,6 +45,12 @@ WantedBy=multi-user.target
 *********************/
 
 func (s Service) entryPoint(payload func(context.Context)) {
+	defer func() {
+		if x := recover(); x != nil {
+			s.logger.Fatalf("panic: %v\n%v", x, string(runtimeDebug.Stack()))
+		}
+	}()
+
 	ctx := context.Background()
 	ctx, cancel := signal.NotifyContext(ctx,
 		syscall.SIGHUP,
