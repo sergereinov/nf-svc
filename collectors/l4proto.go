@@ -9,6 +9,7 @@ var l4proto = map[uint32]string{
 	2:  "IGMP",
 	6:  "TCP",
 	17: "UDP",
+	58: "IPv6-ICMP",
 }
 
 func L4Proto(proto uint32) string {
