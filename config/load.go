@@ -27,24 +27,23 @@ func Load(optPath ...string) (path string, cfg *Config, err error) {
 
 	// Prepare config
 	cfg = &Config{
-		Port:             file.Int("Settings", "Port", _DEFAULT_PORT),
-		SummaryIntervals: file.Ints("Settings", "SummaryIntervals", _DEFAULT_INTERVALS),
-		SummaryTopCount:  file.Int("Settings", "SummaryTopCount", _DEFAULT_TOP_COUNT),
-		TrackingClients:  file.Strings("Settings", "TrackingClients", []string{}),
+		port:             file.Int("Settings", "Port", _DEFAULT_PORT),
+		summaryIntervals: file.Ints("Settings", "SummaryIntervals", _DEFAULT_INTERVALS),
+		summaryTopCount:  file.Int("Settings", "SummaryTopCount", _DEFAULT_TOP_COUNT),
 
 		Logs: Logs{
-			KeepDays:      file.Int("Logs", "KeepDays", _DEFAULT_KEEP_DAYS),
-			MaxFileSizeMB: file.Int("Logs", "MaxFileSizeMB", _DEFAULT_MAX_SIZE),
-			Dir:           file.String("Logs", "Dir", _DEFAULT_LOGS_DIR),
+			keepDays:      file.Int("Logs", "KeepDays", _DEFAULT_KEEP_DAYS),
+			maxFileSizeMB: file.Int("Logs", "MaxFileSizeMB", _DEFAULT_MAX_SIZE),
+			dir:           file.String("Logs", "Dir", _DEFAULT_LOGS_DIR),
 		},
 	}
 
 	errSave := file.SaveTo(path)
 
 	// Update cfg logs path to absolute
-	if !filepath.IsAbs(cfg.Logs.Dir) && filepath.IsAbs(path) {
+	if !filepath.IsAbs(cfg.Logs.dir) && filepath.IsAbs(path) {
 		dir := filepath.Dir(path)
-		cfg.Logs.Dir = filepath.Clean(filepath.Join(dir, cfg.Logs.Dir))
+		cfg.Logs.dir = filepath.Clean(filepath.Join(dir, cfg.Logs.dir))
 	}
 
 	return path, cfg, errors.Join(errLoad, errSave)

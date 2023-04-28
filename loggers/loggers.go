@@ -20,9 +20,9 @@ const (
 
 // Loggers config interface for all type loggers
 type LoggersConfig interface {
-	GetKeepDays() int
-	GetMaxFileSizeMB() int
-	GetDir() string
+	KeepDays() int
+	MaxFileSizeMB() int
+	Dir() string
 }
 
 // Get executable instance file name without file extension
@@ -50,12 +50,12 @@ func baseExecutableName() string {
 
 // Create Lumberjack logger with given filename and params
 func newLogger(cfg LoggersConfig, filename string) *lumberjack.Logger {
-	logPath := filepath.Join(cfg.GetDir(), filename)
+	logPath := filepath.Join(cfg.Dir(), filename)
 	return &lumberjack.Logger{
 		Filename:   logPath,
-		MaxSize:    cfg.GetMaxFileSizeMB(),
+		MaxSize:    cfg.MaxFileSizeMB(),
 		MaxBackups: _MAX_BACKUP,
-		MaxAge:     cfg.GetKeepDays(),
+		MaxAge:     cfg.KeepDays(),
 		Compress:   _COMPRESS,
 	}
 }

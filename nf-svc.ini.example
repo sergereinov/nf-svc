@@ -2,7 +2,6 @@
 Port             = 2055
 SummaryIntervals = 20, 60, 480, 1440
 SummaryTopCount  = 100
-TrackingClients  = 192.168.255.1
 
 [Logs]
 KeepDays      = 30

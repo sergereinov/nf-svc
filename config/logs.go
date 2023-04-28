@@ -1,19 +1,19 @@
 package config
 
 type Logs struct {
-	KeepDays      int
-	MaxFileSizeMB int
-	Dir           string
+	keepDays      int
+	maxFileSizeMB int
+	dir           string
 }
 
-func (c *Logs) GetKeepDays() int {
-	return c.KeepDays
+func (c *Logs) KeepDays() int {
+	return c.keepDays
 }
 
-func (c *Logs) GetMaxFileSizeMB() int {
-	return c.MaxFileSizeMB
+func (c *Logs) MaxFileSizeMB() int {
+	return c.maxFileSizeMB
 }
 
-func (c *Logs) GetDir() string {
-	return c.Dir
+func (c *Logs) Dir() string {
+	return c.dir
 }

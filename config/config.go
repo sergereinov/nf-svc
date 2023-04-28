@@ -1,21 +1,20 @@
 package config
 
 type Config struct {
-	Port             int
-	SummaryIntervals []int
-	SummaryTopCount  int
-	TrackingClients  []string
+	port             int
+	summaryIntervals []int
+	summaryTopCount  int
 	Logs             Logs
 }
 
-func (c *Config) GetSummaryIntervals() []int {
-	return c.SummaryIntervals
+func (c *Config) Port() int {
+	return c.port
 }
 
-func (c *Config) GetSummaryTopCount() int {
-	return c.SummaryTopCount
+func (c *Config) SummaryIntervals() []int {
+	return c.summaryIntervals
 }
 
-func (c *Config) GetTrackingClients() []string {
-	return c.TrackingClients
+func (c *Config) SummaryTopCount() int {
+	return c.summaryTopCount
 }

@@ -18,7 +18,7 @@ import (
 // https://pkg.go.dev/cmd/link
 // go build -ldflags="-X main.Version=1.0.0" ./cmd/nf-svc
 
-var Version = "0.1"
+var Version = "0.2"
 var Name = service.ExecutableFilename()
 var Description = "Standalone NetFlow collector"
 
@@ -82,7 +82,7 @@ func main() {
 			}
 
 			// Run goflow's FlowRoutine
-			err := s.FlowRoutine(workers, addr, cfg.Port, reuse)
+			err := s.FlowRoutine(workers, addr, cfg.Port(), reuse)
 			if err != nil {
 				log.Fatalf("Fatal error: could not listen to UDP (%v)", err)
 			}
