@@ -35,10 +35,8 @@ func NewCollectors(ctx context.Context, wg *sync.WaitGroup, sumcfg SummaryConfig
 	var consumers []chan<- []*flowmessage.FlowMessage
 
 	// Create collectors that will aggregate summaries
-	if logcfg.EnableSummaryLog() && logs.Summary != nil {
-		summaryIntervals := sumcfg.Intervals()
-		//consumers := make([]chan<- []*flowmessage.FlowMessage, 0, len(summaryIntervals)+1)
-		for _, interval := range summaryIntervals {
+	if logcfg.EnableSummaryLog() && logs.Summary != nil && len(sumcfg.Intervals()) > 0 {
+		for _, interval := range sumcfg.Intervals() {
 			if interval > 0 {
 				logs.Common.Printf("Running collector routine: NetFlow Summary with interval %d minutes.", interval)
 				c := NewSummaryCollector(ctx,
