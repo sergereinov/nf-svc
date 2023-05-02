@@ -27,14 +27,19 @@ func Load(optPath ...string) (path string, cfg *Config, err error) {
 
 	// Prepare config
 	cfg = &Config{
-		port:             file.Int("Settings", "Port", _DEFAULT_PORT),
-		summaryIntervals: file.Ints("Settings", "SummaryIntervals", _DEFAULT_INTERVALS),
-		summaryTopCount:  file.Int("Settings", "SummaryTopCount", _DEFAULT_TOP_COUNT),
+		port: file.Int("Settings", "Port", _DEFAULT_PORT),
+
+		Summary: Summary{
+			intervals: file.Ints("Summary", "Intervals", _DEFAULT_INTERVALS),
+			topCount:  file.Int("Summary", "TopCount", _DEFAULT_TOP_COUNT),
+		},
 
 		Logs: Logs{
-			keepDays:      file.Int("Logs", "KeepDays", _DEFAULT_KEEP_DAYS),
-			maxFileSizeMB: file.Int("Logs", "MaxFileSizeMB", _DEFAULT_MAX_SIZE),
-			dir:           file.String("Logs", "Dir", _DEFAULT_LOGS_DIR),
+			keepDays:         file.Int("Logs", "KeepDays", _DEFAULT_KEEP_DAYS),
+			maxFileSizeMB:    file.Int("Logs", "MaxFileSizeMB", _DEFAULT_MAX_SIZE),
+			dir:              file.String("Logs", "Dir", _DEFAULT_LOGS_DIR),
+			enableSummaryLog: file.Bool("Logs", "EnableSummaryLog", true),
+			enableNetFlowLog: file.Bool("Logs", "EnableNetFlowLog", true),
 		},
 	}
 

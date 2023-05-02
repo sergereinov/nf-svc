@@ -30,6 +30,10 @@ func (f *iniFile) Int(section, key string, defaultVal int) int {
 	return f.Section(section).Key(key).MustInt(defaultVal)
 }
 
+func (f *iniFile) Bool(section, key string, defaultVal bool) bool {
+	return f.Section(section).Key(key).MustBool(defaultVal)
+}
+
 func (f *iniFile) Strings(section, key string, defaultVal []string, optDelim ...string) []string {
 	var delim string
 	if len(optDelim) > 0 {

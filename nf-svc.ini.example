@@ -1,9 +1,13 @@
 [Settings]
 Port             = 2055
-SummaryIntervals = 20, 60, 480, 1440
-SummaryTopCount  = 100
+
+[Summary]
+Intervals = 20, 60, 480, 1440
+TopCount  = 100
 
 [Logs]
-KeepDays      = 30
-MaxFileSizeMB = 10
-Dir           = ./logs
+KeepDays         = 30
+MaxFileSizeMB    = 10
+Dir              = ./logs
+EnableSummaryLog = 1
+EnableNetFlowLog = 1

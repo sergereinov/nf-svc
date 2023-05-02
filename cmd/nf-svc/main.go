@@ -57,11 +57,15 @@ func main() {
 
 		// Create netflow consumers
 		collectorsLoggers := collectors.Loggers{
-			Common:  log,
-			Summary: loggers.NewSummaryWriter(ctx, &wg, &cfg.Logs),
-			Netflow: loggers.NewNetflowWriter(ctx, &wg, &cfg.Logs),
+			Common: log,
 		}
-		consumers := collectors.NewCollectors(ctx, &wg, cfg, collectorsLoggers)
+		if cfg.Logs.EnableSummaryLog() {
+			collectorsLoggers.Summary = loggers.NewSummaryWriter(ctx, &wg, &cfg.Logs)
+		}
+		if cfg.Logs.EnableNetFlowLog() {
+			collectorsLoggers.Netflow = loggers.NewNetflowWriter(ctx, &wg, &cfg.Logs)
+		}
+		consumers := collectors.NewCollectors(ctx, &wg, &cfg.Summary, &cfg.Logs, collectorsLoggers)
 
 		// We don't have methods to stop goflow goroutine.
 		// So it will be stopped when exiting the main goroutine.

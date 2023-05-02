@@ -1,9 +1,11 @@
 package config
 
 type Logs struct {
-	keepDays      int
-	maxFileSizeMB int
-	dir           string
+	keepDays         int
+	maxFileSizeMB    int
+	dir              string
+	enableSummaryLog bool
+	enableNetFlowLog bool
 }
 
 func (c *Logs) KeepDays() int {
@@ -16,4 +18,12 @@ func (c *Logs) MaxFileSizeMB() int {
 
 func (c *Logs) Dir() string {
 	return c.dir
+}
+
+func (c *Logs) EnableSummaryLog() bool {
+	return c.enableSummaryLog
+}
+
+func (c *Logs) EnableNetFlowLog() bool {
+	return c.enableNetFlowLog
 }
