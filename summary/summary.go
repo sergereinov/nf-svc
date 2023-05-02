@@ -94,15 +94,13 @@ func (s *summary) Add(fmsg *flowmessage.FlowMessage) {
 	}
 
 	// check if this flow is answer to some other flow
-	isAnswer := func() bool {
-		if _, ok := sampler.flows[key(msg).parent()]; ok {
-			return true
-		}
-		if _, ok := sampler.flows[key(msg).parentMulticast()]; ok {
-			return true
-		}
-		return false
-	}()
+	var isAnswer bool
+	if _, ok := sampler.flows[key(msg).parent()]; ok {
+		isAnswer = true
+	}
+	if _, ok := sampler.flows[key(msg).parentMulticast()]; ok {
+		isAnswer = true
+	}
 
 	// select flows key
 	var flowKey string
