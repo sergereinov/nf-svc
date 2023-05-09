@@ -9,7 +9,7 @@ The service is designed to work on a small server or workstation.
 Also, although the service can be compiled and run on a multi-platform, the main operating system is Windows.
 
 Because of these specific requirements:
-- it has its own log management system
+- it has its own log management system (with [lumberjack logger](https://github.com/natefinch/lumberjack))
 - its settings are set via ini-file
 
 The motivation for creating this tool is to document excessive network load on some device such as a printer, POS, etc. Traffic statistics can be captured using a NetFlow sensor located next to the device. I use a two-port [Mikrotik mAP 2nD](https://mikrotik.com/product/RBmAP2nD) for this, through which the monitored device is turned on.
@@ -17,7 +17,7 @@ The motivation for creating this tool is to document excessive network load on s
 ## How it works
 
 The service receives NetFlow data from the sensor and saves log files of several types:
- - `nf-svc.log` - Information about the operation of service components, an error message, and panic dumps are stored here.
+ - `nf-svc.log` - Information about the operation of service components, an error messages and panic dumps are stored here.
  - `nf-svc-netflow.log` - Here are NetFlow packet dumps, similar to [GoFlow](https://github.com/cloudflare/goflow) log dumps.
  - `nf-svc-summary.log` - This log file is what the service was made for. A summary of traffic statistics collected over a certain time is saved here.
 
@@ -68,3 +68,27 @@ NETFLOW_V9(192.168.255.10) top 100 of 146
 ```
 
 </details>
+
+## How to use
+
+### Build
+
+1. Clone the repo `git clone https://github.com/sergereinov/nf-svc.git`
+2. Run `go mod tidy`
+3. Run `go build -ldflags="-s -w" ./cmd/nf-svc`
+
+### Install
+
+**Linux** (not tested)
+- You may run it from terminal as any other tool `~/nf-svc> ./nf-svc`
+- Or you may use systemd service manager to run it as a service
+
+**Windows**
+- For testing purpose you may run it from cmd as a console mode tool `nf-svc.exe /d`
+- Or it can be installed as a Windows service with `nf-svc.exe /i` (run as administrator)
+- To uninstall the service use `nf-svc.exe /u` (run as administrator)
+
+### Settings
+
+At the first time run, the `nf-svc.ini` settings file will be created automatically (if it did not already exist).
+The contents of the settings should be fairly obvious. An example can be found in `nf-svc.ini.example`.
