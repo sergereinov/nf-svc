@@ -6,10 +6,11 @@ import (
 	"runtime/debug"
 	"sync"
 
+	service "github.com/sergereinov/go-windows-service"
+
 	"github.com/sergereinov/nf-svc/collectors"
 	"github.com/sergereinov/nf-svc/config"
 	"github.com/sergereinov/nf-svc/loggers"
-	"github.com/sergereinov/nf-svc/service"
 	"github.com/sergereinov/nf-svc/transport"
 
 	"github.com/cloudflare/goflow/v3/utils"
