@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/cloudflare/goflow/v3 v3.4.4
-	github.com/sergereinov/go-windows-service v1.0.0
+	github.com/sergereinov/go-windows-service v1.0.1
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
