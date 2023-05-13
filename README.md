@@ -5,7 +5,7 @@ It uses the [CloudFlare GoFlow](https://github.com/cloudflare/goflow) project as
 
 The main idea is to have a network congestion analysis tool that does not require cloud-like infrastructure or maintenance.
 
-The service is designed to work on a small server or workstation.
+The service is designed to work on a small server or on a workstation.
 Also, although the service can be compiled and run on a multi-platform, the main operating system is Windows.
 
 Because of these specific requirements:
@@ -17,7 +17,7 @@ The motivation for creating this tool is to document excessive network load on s
 ## How it works
 
 The service receives NetFlow data from the sensor and saves log files of several types:
- - `nf-svc.log` - Information about the operation of service components, an error messages and panic dumps are stored here.
+ - `nf-svc.log` - Information about the operation of service components, error messages and panic dumps are stored here.
  - `nf-svc-netflow.log` - Here are NetFlow packet dumps, similar to [GoFlow](https://github.com/cloudflare/goflow) log dumps.
  - `nf-svc-summary.log` - This log file is what the service was made for. A summary of traffic statistics collected over a certain time is saved here.
 
